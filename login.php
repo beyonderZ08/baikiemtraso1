@@ -1,19 +1,58 @@
 <?php
 // login.php
 
-// Kiểm tra cookie username
-$welcome_message = "";
-if (isset($_COOKIE['username'])) {
-    $welcome_message = "Chào mừng quay lại, " . htmlspecialchars($_COOKIE['username']) . "!";
-}
+// Khởi tạo session
+session_start();
 
-// Kiểm tra thông báo lỗi hoặc thành công
+// Khởi tạo các biến thông báo
+$welcome_message = "";
 $error_message = "";
 $success_message = "";
+
+// Kiểm tra trạng thái đăng nhập
+if (isset($_SESSION['username'])) {
+    // Nếu đã đăng nhập, chuyển hướng ngay đến dashboard
+    if (file_exists("dashboard.php")) {
+        header("Location: dashboard.php");
+        exit();
+    } else {
+        $error_message = "File dashboard.php không tồn tại!";
+    }
+}
+
+// Xử lý đăng nhập khi form được gửi
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Lấy dữ liệu từ form và làm sạch khoảng trắng
+    $username = trim($_POST['username']);
+    $password = trim($_POST['password']);
+
+    // Kiểm tra thông tin đăng nhập dựa trên session đã đăng ký
+    if (isset($_SESSION['registered_username']) && isset($_SESSION['registered_password'])) {
+        $registered_username = $_SESSION['registered_username'];
+        $registered_password = $_SESSION['registered_password'];
+
+        if ($username === $registered_username && $password === $registered_password) {
+            // Lưu username vào session
+            $_SESSION['username'] = $username;
+
+            // Kiểm tra file dashboard.php trước khi chuyển hướng
+            if (file_exists("dashboard.php")) {
+                header("Location: dashboard.php");
+                exit();
+            } else {
+                $error_message = "File dashboard.php không tồn tại!";
+            }
+        } else {
+            $error_message = "Tên đăng nhập hoặc mật khẩu không đúng!";
+        }
+    } else {
+        $error_message = "Không tìm thấy tài khoản đăng ký. Vui lòng đăng ký trước!";
+    }
+}
+
+// Kiểm tra thông báo lỗi hoặc thành công từ các trang khác
 if (isset($_GET['error'])) {
-    if ($_GET['error'] == 1) {
-        $error_message = "Tên đăng nhập hoặc mật khẩu không đúng!";
-    } elseif ($_GET['error'] == 2) {
+    if ($_GET['error'] == 2) {
         $error_message = "Vui lòng đăng nhập để truy cập dashboard!";
     }
 }
@@ -48,16 +87,13 @@ if (isset($_GET['success'])) {
     <main class="login-content">
         <div class="login-box">
             <h2>Đăng Nhập Hệ Thống</h2>
-            <?php if ($welcome_message): ?>
-                <p class="welcome-message"><?php echo $welcome_message; ?></p>
-            <?php endif; ?>
             <?php if ($error_message): ?>
                 <p class="error-message"><?php echo $error_message; ?></p>
             <?php endif; ?>
             <?php if ($success_message): ?>
                 <p class="success-message"><?php echo $success_message; ?></p>
             <?php endif; ?>
-            <form action="process_login.php" method="POST">
+            <form action="login.php" method="POST">
                 <div class="input-group">
                     <label for="username">Tên đăng nhập</label>
                     <input type="text" id="username" name="username" placeholder="Nhập tên đăng nhập" required>
@@ -67,8 +103,10 @@ if (isset($_GET['success'])) {
                     <input type="password" id="password" name="password" placeholder="Nhập mật khẩu" required>
                 </div>
                 <button type="submit" class="btn-login">Đăng Nhập</button>
-                <p class="signup-link">Chưa có tài khoản? <a href="register.php">Đăng ký ngay</a></p>
-                <p class="forgot-link"><a href="forgot_password.php">Quên mật khẩu?</a></p>
+                <div class="login-options">
+                    <p class="signup-link">Chưa có tài khoản? <a href="register.php">Đăng ký ngay</a></p>
+                    <p class="forgot-link"><a href="forgotpassword.php">Quên mật khẩu?</a></p>
+                </div>
             </form>
         </div>
         <div class="tech-overlay"></div>

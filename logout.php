@@ -1,8 +1,14 @@
 <?php
 // logout.php
 
-// Xóa cookie username
-setcookie("username", "", time() - 3600, "/");
+// Khởi tạo session
+session_start();
+
+// Hủy tất cả các biến session
+session_unset();
+
+// Hủy session
+session_destroy();
 
 // Chuyển hướng về login.php
 header("Location: login.php");
