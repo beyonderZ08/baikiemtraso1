@@ -4,6 +4,9 @@
 // Khởi tạo session
 session_start();
 
+// Kết nối database
+include 'db_connect.php';
+
 // Khởi tạo các biến thông báo
 $error_message = "";
 $success_message = "";
@@ -30,40 +33,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } elseif ($password !== $confirm_password) {
         $error_message = "Mật khẩu nhập lại không khớp!";
     } else {
-        // Lưu thông tin vào session (tạm thời, trong thực tế nên lưu vào database)
-        $_SESSION['registered_username'] = $username;
-        $_SESSION['registered_email'] = $email;
-        $_SESSION['registered_password'] = $password; // Lưu mật khẩu (không an toàn, chỉ để demo)
+        try {
+            // Kiểm tra xem username hoặc email đã tồn tại chưa
+            $stmt = $conn->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
+            $stmt->execute([$username, $email]);
+            if ($stmt->rowCount() > 0) {
+                $error_message = "Tên đăng nhập hoặc email đã được sử dụng!";
+            } else {
+                // Mã hóa mật khẩu
+                $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-        // Chuyển hướng đến trang đăng nhập với thông báo thành công
-        header("Location: login.php?success=1");
-        exit();
+                // Lưu thông tin vào database (reset_token để NULL)
+                $stmt = $conn->prepare("INSERT INTO users (username, email, password, reset_token) VALUES (?, ?, ?, NULL)");
+                $stmt->execute([$username, $email, $hashed_password]);
+
+                // Chuyển hướng đến trang đăng nhập với thông báo thành công
+                header("Location: login.php?success=1");
+                exit();
+            }
+        } catch (PDOException $e) {
+            $error_message = "Lỗi khi đăng ký: " . $e->getMessage();
+        }
     }
 }
-?>
 
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng Ký - Tech 4.0</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-</head>
-<body>
-    <header>
-        <div class="container">
-            <div class="logo">
-                <h1>Tech 4.0</h1>
-            </div>
-            <nav class="nav-links">
-                <a href="index.php">Home</a>
-                <a href="#">About</a>
-                <a href="contact.php">Contact</a>
-            </nav>
-        </div>
-    </header>
+// Include header
+$pageTitle = "Đăng Ký - Tech 4.0";
+include 'header.php';
+?>
 
     <main class="register-content">
         <div class="register-box">
@@ -74,15 +71,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <form action="register.php" method="POST">
                 <div class="input-group">
                     <label for="username">Tên đăng nhập</label>
-                    <input value="<?php echo isset($username)? $username:""; ?>" type="text" id="username" name="username" placeholder="Nhập tên đăng nhập" required>
+                    <input type="text" id="username" name="username" placeholder="Nhập tên đăng nhập" required>
                 </div>
                 <div class="input-group">
                     <label for="email">Email</label>
-                    <input value="<?php echo isset($email)? $email:"";?>"type="email" id="email" name="email" placeholder="Nhập email" required>
+                    <input value="<?php echo isset($email) ? htmlspecialchars($email) : ''; ?>" type="email" id="email" name="email" placeholder="Nhập email" required>
                 </div>
                 <div class="input-group">
                     <label for="password">Mật khẩu</label>
-                    <input value="<?php echo isset($password)? $password:"";?>"type="password" id="password" name="password" placeholder="Nhập mật khẩu" required>
+                    <input type="password" id="password" name="password" placeholder="Nhập mật khẩu" required>
                 </div>
                 <div class="input-group">
                     <label for="confirm_password">Nhập lại mật khẩu</label>

@@ -4,6 +4,9 @@
 // Khởi tạo session
 session_start();
 
+// Kết nối database
+include 'db_connect.php';
+
 // Khởi tạo các biến thông báo
 $welcome_message = "";
 $error_message = "";
@@ -23,19 +26,20 @@ if (isset($_SESSION['username'])) {
 // Xử lý đăng nhập khi form được gửi
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Lấy dữ liệu từ form và làm sạch khoảng trắng
-    $username = trim($_POST['username']);
+    $email = trim($_POST['email']);
     $password = trim($_POST['password']);
 
-    // Kiểm tra thông tin đăng nhập dựa trên session đã đăng ký
-    if (isset($_SESSION['registered_username']) && isset($_SESSION['registered_password'])) {
-        $registered_username = $_SESSION['registered_username'];
-        $registered_password = $_SESSION['registered_password'];
+    try {
+        // Kiểm tra thông tin đăng nhập từ database
+        $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
+        $stmt->execute([$email]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($username === $registered_username && $password === $registered_password) {
-            // Lưu username vào session
-            $_SESSION['username'] = $username;
+        if ($user && password_verify($password, $user['password'])) {
+            // Đăng nhập thành công, lưu username vào session
+            $_SESSION['username'] = $user['username'];
 
-            // Kiểm tra file dashboard.php trước khi chuyển hướng
+            // Chuyển hướng đến dashboard
             if (file_exists("dashboard.php")) {
                 header("Location: dashboard.php");
                 exit();
@@ -43,46 +47,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $error_message = "File dashboard.php không tồn tại!";
             }
         } else {
-            $error_message = "Tên đăng nhập hoặc mật khẩu không đúng!";
+            $error_message = "Email hoặc mật khẩu không đúng!";
         }
-    } else {
-        $error_message = "Không tìm thấy tài khoản đăng ký. Vui lòng đăng ký trước!";
+    } catch (PDOException $e) {
+        $error_message = "Lỗi khi đăng nhập: " . $e->getMessage();
     }
 }
 
 // Kiểm tra thông báo lỗi hoặc thành công từ các trang khác
 if (isset($_GET['error'])) {
     if ($_GET['error'] == 2) {
-        $error_message = "Vui lòng đăng nhập để truy cập dashboard!";
+        $error_message = "Vui lòng đăng nhập để truy cập danh sách sản phẩm!";
     }
 }
 if (isset($_GET['success'])) {
     $success_message = "Đăng ký thành công! Vui lòng đăng nhập.";
 }
-?>
 
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng Nhập - Tech 4.0</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-</head>
-<body>
-    <header>
-        <div class="container">
-            <div class="logo">
-                <h1>Tech 4.0</h1>
-            </div>
-            <nav class="nav-links">
-                <a href="index.php">Home</a>
-                <a href="#">About</a>
-                <a href="contact.php">Contact</a>
-            </nav>
-        </div>
-    </header>
+// Include header
+$pageTitle = "Đăng Nhập - Tech 4.0";
+include 'header.php';
+?>
 
     <main class="login-content">
         <div class="login-box">
@@ -95,8 +80,8 @@ if (isset($_GET['success'])) {
             <?php endif; ?>
             <form action="login.php" method="POST">
                 <div class="input-group">
-                    <label for="username">Tên đăng nhập</label>
-                    <input type="text" id="username" name="username" placeholder="Nhập tên đăng nhập" required>
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="Nhập email" required>
                 </div>
                 <div class="input-group">
                     <label for="password">Mật khẩu</label>
@@ -105,7 +90,7 @@ if (isset($_GET['success'])) {
                 <button type="submit" class="btn-login">Đăng Nhập</button>
                 <div class="login-options">
                     <p class="signup-link">Chưa có tài khoản? <a href="register.php">Đăng ký ngay</a></p>
-                    <p class="forgot-link"><a href="forgotpassword.php">Quên mật khẩu?</a></p>
+                    <p class="forgot-link"><a href="forgot_password.php">Quên mật khẩu?</a></p>
                 </div>
             </form>
         </div>
