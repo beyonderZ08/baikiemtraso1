@@ -8,7 +8,6 @@
 body {
     font-family: 'Orbitron', sans-serif;
     background-color: #0d0d0d;
-    color: #ffffff;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
@@ -442,8 +441,127 @@ header .container {
     margin: 5px 0;
 }
 
-/* === Shared Buttons === */
-.btn-login, .btn-register, .btn-reset, .btn-create {
+/* === Nội dung danh sách sản phẩm (Product List) === */
+.product-list-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 100px 20px 40px;
+    min-height: 100vh;
+    position: relative;
+}
+
+.product-list-box {
+    background: rgba(26, 26, 26, 0.9);
+    padding: 30px;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 800px;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+    z-index: 2;
+}
+
+.product-list-box h2 {
+    font-size: 28px;
+    color: #00ffff;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+}
+
+.product-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.product-table th, .product-table td {
+    padding: 10px;
+    border: 1px solid #00ffff;
+    color: #b3b3b3;
+    font-size: 14px;
+}
+
+.product-table th {
+    background: #1a1a1a;
+    color: #00ffff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.product-table td {
+    background: #2b2b2b;
+}
+
+.btn-edit {
+    display: inline-block;
+    padding: 8px 20px;
+    background-color: #00ffff;
+    color: #0d0d0d;
+    border-radius: 50px;
+    font-size: 14px;
+    text-transform: uppercase;
+    text-decoration: none;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+    transition: all 0.3s ease;
+}
+
+.btn-edit:hover {
+    background-color: #00cccc;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 1);
+    transform: scale(1.05);
+}
+
+/* === Nội dung thêm/cập nhật sản phẩm (Create/Update Product) === */
+.update-product-content {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 100px 20px;
+    position: relative;
+    min-height: 100vh; /* Đảm bảo chiều cao tối thiểu để căn giữa */
+}
+
+.update-product-box {
+    background: rgba(26, 26, 26, 0.95);
+    padding: 40px;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.6), inset 0 0 10px rgba(0, 255, 255, 0.3);
+    z-index: 2;
+    border: 2px solid #00ffff;
+    position: relative;
+    overflow: hidden;
+}
+
+.update-product-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.2), transparent);
+    animation: glow 3s infinite;
+}
+
+.update-product-box h2 {
+    font-size: 30px;
+    color: #00ffff;
+    margin-bottom: 30px;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    text-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+    position: relative;
+    z-index: 2;
+}
+
+.btn-update {
     width: 100%;
     padding: 15px;
     background: linear-gradient(90deg, #ff00ff, #00ffff);
@@ -460,13 +578,13 @@ header .container {
     overflow: hidden;
 }
 
-.btn-login:hover, .btn-register:hover, .btn-reset:hover, .btn-create:hover {
+.btn-update:hover {
     background: linear-gradient(90deg, #cc00cc, #00cccc);
     box-shadow: 0 0 30px rgba(255, 0, 255, 1);
     transform: translateY(-2px);
 }
 
-.btn-login::before, .btn-register::before, .btn-reset::before, .btn-create::before {
+.btn-update::before {
     content: '';
     position: absolute;
     top: 0;
@@ -477,7 +595,63 @@ header .container {
     transition: 0.5s;
 }
 
-.btn-login:hover::before, .btn-register:hover::before, .btn-reset:hover::before, .btn-create:hover::before {
+.btn-update:hover::before {
+    left: 100%;
+}
+
+.back-link {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #b3b3b3;
+}
+
+.back-link a {
+    color: #00ffff;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.back-link a:hover {
+    color: #ff00ff;
+    text-shadow: 0 0 10px rgba(255, 0, 255, 0.7);
+}
+
+/* === Shared Buttons === */
+.btn-login, .btn-register, .btn-reset, .btn-create, .btn-update {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(90deg, #ff00ff, #00ffff);
+    color: #0d0d0d;
+    border: none;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 0 20px rgba(255, 0, 255, 0.7);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-login:hover, .btn-register:hover, .btn-reset:hover, .btn-create:hover, .btn-update:hover {
+    background: linear-gradient(90deg, #cc00cc, #00cccc);
+    box-shadow: 0 0 30px rgba(255, 0, 255, 1);
+    transform: translateY(-2px);
+}
+
+.btn-login::before, .btn-register::before, .btn-reset::before, .btn-create::before, .btn-update::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: 0.5s;
+}
+
+.btn-login:hover::before, .btn-register:hover::before, .btn-reset:hover::before, .btn-create:hover::before, .btn-update:hover::before {
     left: 100%;
 }
 
@@ -500,6 +674,46 @@ header .container {
     background-color: #cc0000;
     box-shadow: 0 0 25px rgba(255, 0, 0, 1);
     transform: scale(1.05);
+}
+
+.btn-create {
+    display: inline-block; /* Thay vì width: 100% */
+    width: auto; /* Chỉ chiếm chiều rộng cần thiết */
+    padding: 10px 30px; /* Giảm padding để nút nhỏ gọn hơn */
+    background: linear-gradient(90deg, #ff00ff, #00ffff);
+    color: #0d0d0d;
+    border: none;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 0 20px rgba(255, 0, 255, 0.7);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    text-decoration: none; /* Đảm bảo không có gạch chân khi dùng thẻ <a> */
+}
+
+.btn-create:hover {
+    background: linear-gradient(90deg, #cc00cc, #00cccc);
+    box-shadow: 0 0 30px rgba(255, 0, 255, 1);
+    transform: translateY(-2px);
+}
+
+.btn-create::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: 0.5s;
+}
+
+.btn-create:hover::before {
+    left: 100%;
 }
 
 /* === Shared Input Styles === */
@@ -528,6 +742,10 @@ header .container {
     font-size: 16px;
     outline: none;
     transition: all 0.3s ease;
+}
+
+.input-group textarea {
+    resize: vertical;
 }
 
 .input-group input:focus, .input-group textarea:focus {
@@ -621,4 +839,183 @@ footer {
     font-size: 14px;
     color: #b3b3b3;
     box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+}
+/* Quản lý người dùng */
+.manage-users-content, .create-user-content, .edit-user-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    position: relative;
+    overflow: hidden;
+}
+
+.manage-users-box, .create-user-box, .edit-user-box {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 800px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.users-table th, .users-table td {
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.users-table th {
+    background-color: #2a5298;
+    color: white;
+}
+
+.users-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.btn-create, .btn-edit, .btn-delete, .btn-back, .btn-manage, .btn-products {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    margin: 0.2rem;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.btn-create, .btn-manage, .btn-products {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-create:hover, .btn-manage:hover, .btn-products:hover {
+    background-color: #218838;
+}
+
+.btn-edit {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-edit:hover {
+    background-color: #0056b3;
+}
+
+.btn-delete {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-delete:hover {
+    background-color: #c82333;
+}
+
+.btn-back {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-back:hover {
+    background-color: #5a6268;
+}
+
+.error-message {
+    color: #dc3545;
+    margin-bottom: 1rem;
+}
+
+.success-message {
+    color: #28a745;
+    margin-bottom: 1rem;
+}
+/* Hồ sơ cá nhân */
+.profile-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-box {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+.avatar-preview {
+    max-width: 100px;
+    max-height: 100px;
+    margin: 0.5rem 0;
+    border-radius: 5px;
+}
+
+.btn-update, .btn-profile {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    margin: 0.2rem;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.btn-update {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-update:hover {
+    background-color: #0056b3;
+}
+
+.btn-profile {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.btn-profile:hover {
+    background-color: #138496;
+}
+/* User Profile on Dashboard */
+.user-profile {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.user-avatar {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%; /* Làm ảnh tròn */
+    object-fit: cover; /* Đảm bảo ảnh không bị méo */
+    border: 3px solid #fff; /* Viền trắng giống Facebook */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Đổ bóng nhẹ */
+}
+
+.user-name {
+    margin-top: 0.5rem;
+    font-size: 1.5rem;
+    color: #fff; /* Màu chữ trắng để nổi bật trên nền gradient */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3); /* Đổ bóng chữ */
 }

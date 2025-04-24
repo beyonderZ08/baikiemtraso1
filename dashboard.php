@@ -4,49 +4,63 @@
 // Khởi tạo session
 session_start();
 
+// Kết nối database
+include 'db_connect.php';
+
 // Kiểm tra trạng thái đăng nhập
 if (!isset($_SESSION['username'])) {
-    // Nếu chưa đăng nhập, chuyển hướng về login.php
-    header("Location: login.php?error=2"); // error=2: Vui lòng đăng nhập
+    header("Location: login.php?error=2");
     exit();
 }
 
-$username = htmlspecialchars($_SESSION['username']);
-?>
+// Lấy thông tin người dùng đang đăng nhập
+$username = $_SESSION['username'];
+try {
+    $stmt = $conn->prepare("SELECT * FROM users WHERE username = ?");
+    $stmt->execute([$username]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Tech 4.0</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-</head>
-<body>
-    <header>
-        <div class="container">
-            <div class="logo">
-                <h1>Tech 4.0</h1>
-            </div>
-            <nav class="nav-links">
-                <a href="index.php">Home</a>
-                <a href="#">About</a>
-                <a href="contact.php">Contact</a>
-                <a href="logout.php">Đăng Xuất</a>
-            </nav>
-        </div>
-    </header>
+    if (!$user) {
+        header("Location: login.php?error=3"); // Người dùng không tồn tại
+        exit();
+    }
+} catch (PDOException $e) {
+    $error_message = "Lỗi khi lấy thông tin người dùng: " . $e->getMessage();
+}
+
+// Kiểm tra thông báo lỗi
+if (isset($_GET['error']) && $_GET['error'] == 3) {
+    $error_message = "Bạn không có quyền truy cập trang quản lý người dùng!";
+}
+
+// Include header
+$pageTitle = "Dashboard - Tech 4.0";
+include 'header.php';
+?>
 
     <main class="dashboard-content">
         <div class="dashboard-box">
-            <h2>Chào mừng, <?php echo $username; ?>!</h2>
-            <p>Đây là trang quản lý của bạn. Bạn có thể xem thông tin tài khoản hoặc thực hiện các thao tác khác tại đây.</p>
+            <div class="user-profile">
+                <?php if ($user['avatar']): ?>
+                    <img src="<?php echo htmlspecialchars($user['avatar']); ?>" alt="Avatar" class="user-avatar">
+                <?php else: ?>
+                    <img src="https://via.placeholder.com/150" alt="Default Avatar" class="user-avatar">
+                <?php endif; ?>
+                <h3 class="user-name"><?php echo htmlspecialchars($user['username']); ?></h3>
+            </div>
+            <h2>Chào mừng đến với Dashboard</h2>
             <div class="dashboard-info">
                 <h3>Thông tin tài khoản</h3>
-                <p><strong>Tên đăng nhập:</strong> <?php echo $username; ?></p>
-                <p><strong>Email:</strong> <?php echo isset($_SESSION['registered_email']) ? htmlspecialchars($_SESSION['registered_email']) : 'Chưa có thông tin'; ?></p>
+                <p>Người dùng: <?php echo htmlspecialchars($user['username']); ?></p>
             </div>
+            <?php if (isset($error_message)): ?>
+                <p class="error-message"><?php echo $error_message; ?></p>
+            <?php endif; ?>
+            <p><a href="profile.php" class="btn-profile">Hồ Sơ Cá Nhân</a></p>
+            <?php if ($_SESSION['username'] === 'admin'): ?>
+                <p><a href="manage_users.php" class="btn-manage">Quản Lý Người Dùng</a></p>
+            <?php endif; ?>
+            <p><a href="product/index.php" class="btn-products">Quản Lý Sản Phẩm</a></p>
             <a href="logout.php" class="btn-logout">Đăng Xuất</a>
         </div>
         <div class="tech-overlay"></div>
