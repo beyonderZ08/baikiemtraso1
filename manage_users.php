@@ -1,17 +1,24 @@
 <?php
+// manage_users.php
+
+// Khởi tạo session
 session_start();
+
 // Kết nối database
 include 'db_connect.php';
+
 // Kiểm tra trạng thái đăng nhập
 if (!isset($_SESSION['username'])) {
     header("Location: login.php?error=2"); // Vui lòng đăng nhập
     exit();
 }
-// Kiểm tra quyền quản trị (ví dụ: chỉ admin được truy cập)
+
+// Kiểm tra quyền quản trị
 if ($_SESSION['username'] !== 'admin') {
     header("Location: dashboard.php?error=3"); // Không có quyền truy cập
     exit();
 }
+
 // Xử lý xóa người dùng
 if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
     $id = $_GET['id'];
@@ -20,10 +27,12 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
         $stmt = $conn->prepare("SELECT avatar FROM users WHERE id = ?");
         $stmt->execute([$id]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
         // Xóa avatar nếu tồn tại
         if ($user['avatar'] && file_exists($user['avatar'])) {
             unlink($user['avatar']);
         }
+
         // Xóa người dùng
         $stmt = $conn->prepare("DELETE FROM users WHERE id = ?");
         $stmt->execute([$id]);
@@ -33,6 +42,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
         $error_message = "Lỗi khi xóa người dùng: " . $e->getMessage();
     }
 }
+
 // Lấy danh sách người dùng từ database
 try {
     $stmt = $conn->prepare("SELECT * FROM users");
@@ -42,14 +52,17 @@ try {
     $users = [];
     $error_message = "Lỗi khi lấy danh sách người dùng: " . $e->getMessage();
 }
+
 // Kiểm tra thông báo thành công
 if (isset($_GET['success'])) {
     $success_message = "Thao tác thành công!";
 }
+
 // Include header
 $pageTitle = "Quản Lý Người Dùng - Tech 4.0";
 include 'header.php';
 ?>
+
     <main class="manage-users-content">
         <div class="manage-users-box">
             <h2>Quản Lý Người Dùng</h2>
@@ -101,6 +114,7 @@ include 'header.php';
         </div>
         <div class="tech-overlay"></div>
     </main>
+
     <footer>
         <p>© 2025 - Công nghệ 4.0</p>
     </footer>
