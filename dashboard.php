@@ -1,19 +1,14 @@
 <?php
 // dashboard.php
 
-// Khởi tạo session
 session_start();
-
-// Kết nối database
 include 'db_connect.php';
 
-// Kiểm tra trạng thái đăng nhập
 if (!isset($_SESSION['username'])) {
     header("Location: login.php?error=2");
     exit();
 }
 
-// Lấy thông tin người dùng đang đăng nhập
 $username = $_SESSION['username'];
 try {
     $stmt = $conn->prepare("SELECT * FROM users WHERE username = ?");
@@ -21,46 +16,54 @@ try {
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$user) {
-        header("Location: login.php?error=3"); // Người dùng không tồn tại
+        header("Location: login.php?error=3");
         exit();
     }
 } catch (PDOException $e) {
     $error_message = "Lỗi khi lấy thông tin người dùng: " . $e->getMessage();
 }
 
-// Kiểm tra thông báo lỗi
-if (isset($_GET['error']) && $_GET['error'] == 3) {
-    $error_message = "Bạn không có quyền truy cập trang quản lý người dùng!";
+try {
+    $stmt = $conn->prepare("SELECT * FROM products");
+    $stmt->execute();
+    $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $products = [];
+    $error_message = "Lỗi khi lấy danh sách sản phẩm: " . $e->getMessage();
 }
 
-// Include header
+if (isset($_GET['error']) && $_GET['error'] == 3) {
+    $error_message = "Bạn không có quyền truy cập trang quản lý!";
+}
+
 $pageTitle = "Dashboard - Tech 4.0";
 include 'header.php';
 ?>
 
     <main class="dashboard-content">
         <div class="dashboard-box">
-            <div class="user-profile">
-                <?php if ($user['avatar']): ?>
-                    <img src="<?php echo htmlspecialchars($user['avatar']); ?>" alt="Avatar" class="user-avatar">
-                <?php else: ?>
-                    <img src="https://via.placeholder.com/150" alt="Default Avatar" class="user-avatar">
-                <?php endif; ?>
-                <h3 class="user-name"><?php echo htmlspecialchars($user['username']); ?></h3>
-            </div>
-            <h2>Chào mừng đến với Dashboard</h2>
-            <div class="dashboard-info">
-                <h3>Thông tin tài khoản</h3>
-                <p>Người dùng: <?php echo htmlspecialchars($user['username']); ?></p>
-            </div>
             <?php if (isset($error_message)): ?>
                 <p class="error-message"><?php echo $error_message; ?></p>
             <?php endif; ?>
-            <p><a href="profile.php" class="btn-profile">Hồ Sơ Cá Nhân</a></p>
+            <div class="product-list">
+                <?php if (!empty($products)): ?>
+                    <?php foreach ($products as $product): ?>
+                        <div class="product-item">
+                            <img src="<?php echo htmlspecialchars($product['image'] ?? 'https://via.placeholder.com/200'); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" class="product-image">
+                            <h4><?php echo htmlspecialchars($product['name']); ?></h4>
+                            <p class="product-price"><?php echo number_format($product['price'], 0, ',', '.'); ?>đ</p>
+                            <a href="product_details.php?id=<?php echo $product['id']; ?>" class="btn-view">Xem chi tiết</a>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p class="error-message">Chưa có sản phẩm nào!</p>
+                <?php endif; ?>
+            </div>
             <?php if ($_SESSION['username'] === 'admin'): ?>
                 <p><a href="manage_users.php" class="btn-manage">Quản Lý Người Dùng</a></p>
+                <p><a href="manage_categories.php" class="btn-manage">Quản Lý Danh Mục</a></p>
+                <p><a href="manage_products.php" class="btn-manage">Quản Lý Sản Phẩm</a></p>
             <?php endif; ?>
-            <p><a href="product/index.php" class="btn-products">Quản Lý Sản Phẩm</a></p>
             <a href="logout.php" class="btn-logout">Đăng Xuất</a>
         </div>
         <div class="tech-overlay"></div>
